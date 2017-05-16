@@ -1,0 +1,66 @@
+# geoc_conv
+# program to convert geocoordinates from conventional to decimal format
+# 2017-May-16 by Greg Wray
+#
+# usage: input file plain text with one DMS geocoordinate per line
+#       input format: DD˚MM'SS.SS"C for deg, min, sec,23 N/S or E/W
+#       example input line: 33˚18'09.34"N,123˚11'03.33"W
+#       example output line: 33.3026N, 123.1843W
+
+def main():
+
+        from tkinter.filedialog import askopenfilename, asksaveasfilename
+
+        # splash and query for file names
+        print("Convert geocoordinates from degrees/minutes/seconds (DMS) to decimal")
+        input_file_name = askopenfilename()
+        output_file_name = asksaveasfilename()
+        
+        # open and assign files
+        infile = open(input_file_name, "r", encoding='utf-8')   
+        outfile = open(output_file_name, "w", encoding='utf-8')
+
+        # place headers on output file
+        print("DMS coordinates                 decimal coordinates", file=outfile)
+
+        # iterate through each line of input file
+        for line in infile.readlines():
+
+                # slice into lattitude and longitude
+                DMS_latt, DMS_long = line.split(",") 
+
+                # left-pad with 0s to make all strings same length
+                DMS_latt = DMS_latt.rjust(14, "0")
+                DMS_long = DMS_long.rjust(15, "0")
+                                         
+                # decompose into components
+                DMS_latt_deg = float(DMS_latt[0:3])   
+                DMS_latt_min = float(DMS_latt[4:6])
+                DMS_latt_sec = float(DMS_latt[7:12])
+                DMS_long_deg = float(DMS_long[0:3])
+                DMS_long_min = float(DMS_long[4:6])
+                DMS_long_sec = float(DMS_long[7:12])
+                
+                # calculate decimal value
+                dec_latt = DMS_latt_deg + DMS_latt_min/60 + DMS_latt_sec/3600 
+                dec_long = DMS_long_deg + DMS_long_min/60 + DMS_long_sec/3600
+
+                # truncate to 4 decimal points and convert back into string
+                out_dec_latt = str(round(dec_latt,4))
+                out_dec_long = str(round(dec_long,4))
+
+                # add degree sign and N/S or E/W
+                out_dec_latt = out_dec_latt + "˚" + DMS_latt[13]
+                out_dec_long = out_dec_long + "˚" + DMS_long[13]
+
+                # assemble into new line for output
+                line = line.strip('\n')
+                newline = line + "  -->   " + out_dec_latt + ", " + out_dec_long
+                
+                # output results
+                print(newline, file=outfile)
+
+        infile.close
+        outfile.close
+
+main()
